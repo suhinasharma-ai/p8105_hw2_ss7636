@@ -1,0 +1,38 @@
+---
+title: "p8105_hw2_ss7636"
+output: html_document
+date: "2025-09-28"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(readxl)
+```
+
+```{r}
+data = 
+ read_csv("fivethirtyeight_datasets/pols-month.csv", na = c("NA",".", ""))
+
+data
+```
+```{r}
+data |> 
+  separate(mon, into = c("year", "month", "day"), sep = "-") |> 
+  mutate(
+    month = month.name[as.integer(month)]
+    ) |> 
+  mutate(
+    president = case_when(
+    prez_gop == 1 ~ "gop",
+    prez_dem == 1 ~ "dem"
+    )) |> 
+  select(-prez_gop, -prez_dem, -day)
+    
+
+```
+
+
