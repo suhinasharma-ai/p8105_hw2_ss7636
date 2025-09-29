@@ -13,7 +13,7 @@ library(tidyverse)
 library(readxl)
 ```
 
-#Number 1
+# Number 1
 ```{r}
 pols = 
  read_csv("fivethirtyeight_datasets/pols-month.csv", na = c("NA",".", ""))
@@ -24,32 +24,40 @@ pols
 pols = pols |> 
   separate(mon, into = c("year", "month", "day"), sep = "-") |> 
   mutate(
-    month = month.name[as.integer(month)]
+    month = month.name[as.integer(month)],
+    year  = as.numeric(year)
     ) |> 
   mutate(
     president = case_when(
-    prez_gop == 1 ~ "gop",
+    prez_gop == 1 | 2 ~ "gop",  #there are some values of gop that have 2, we need to account for this.
     prez_dem == 1 ~ "dem"
     )) |> 
   select(-prez_gop, -prez_dem, -day)
   
-
+pols
 ```
 
 ```{r}
-snap = 
+snp = 
  read_csv("fivethirtyeight_datasets/snp.csv", na = c("NA",".", ""))
 
-snap
+snp
 ```
 ```{r}
-snap = snap |> 
+snp = snp |> 
   separate(date, into = c("month", "day", "year"), sep = "/") |> 
   mutate(
-    month = month.name[as.integer(month)]
+    month = month.name[as.integer(month)],
+    year  = as.numeric(year)
     ) |> 
-  mutate(year = paste0("20", year)) |> 
+  mutate(year = case_when(
+    year > 15 ~ year + 1900, # from 40-99, add 1900 to the year
+    year <= 15 ~ year + 2000 # from 00-15, add 2000 to year
+  )) |> 
   relocate(year, month, day, close)
+
+snp
+
 ```
 
 ```{r}
@@ -80,22 +88,96 @@ unemployment =
 unemployment
 ```
 
-#Joining the datasets:
+Joining the datasets:
 ```{r}
-joined_df_pols_snap = inner_join(pols, snap, by = c("year", "month")) |> 
+joined_df_pols_snap = left_join(pols, snp, by = c("year", "month")) |> 
   mutate(year = as.numeric(year))
 joined_df_pols_snap
+
+ # put bigger table first (what information is more important to keep).
 ```
 
 ```{r}
-joined_df_pols_snap_unemployment = inner_join(unemployment, joined_df_pols_snap, by = c("year", "month"))
-joined_df_pols_snap_unemployment
+joined_df_pols_snap_unemployment = left_join(joined_df_pols_snap, unemployment, by = c("year", "month"))
+joined_df_pols_snap_unemployment 
 ```
 
-The file “pols-month” contains 822 observations of 9 variables related to the number of national politicians who are democratic or republican at any given time. The year started as early as 1947 and goes until 2015. It contained key columns such as, mon: date of the count, prez_gop: indicator of whether the president was republican on the associated date (1 = yes, 0 = no), and prez_dem: indicator of whether the president was democratic on the associated date (1 = yes, 0 = no). The file “snp” contains 787 observations of 2 variables related to Standard & Poor’s stock market index (S&P). The important variables are date: the date of the observation and close: the closing values of the S&P stock index on the associated date. The startng date is around 2000 and the end date is 2050. The file “unemployment” contains 68 observations of 13 variables. It contains the percent of unemployment in a certain month and year. The year starts at 1948 and goes until 2050. The key variables after data tidying is year, month, and value (which shows the percent of unemployed). The joint table has 186 rows and 12 columns. The year starts at 2000 and goes until 2015.  The key variables in this table are year, month, value, and president. 
+The file “pols-month” contains 822 observations of 9 variables related to the number of national politicians who are democratic or republican at any given time. The year started as early as 1947 and goes until 2015. It contained key columns such as, mon: date of the count, prez_gop: indicator of whether the president was republican on the associated date (1 = yes, 0 = no), although there were a couple values where prez_gop = 2. prez_dem: indicator of whether the president was democratic on the associated date (1 = yes, 0 = no). The file “snp” contains 787 observations of 2 variables related to Standard & Poor’s stock market index (S&P). The important variables are date: the date of the observation and close: the closing values of the S&P stock index on the associated date. The starting year is 1950 and the end year is 2015. The file “unemployment” contains 68 observations of 13 variables. It contains the percent of unemployment in a certain month and year. The year starts at 1948 and goes until 2015. The key variables after data tidying is year, month, and value (which shows the percent of unemployed). The joint table has 822 rows and 12 columns. The year starts at 1947 and goes until 2015.  The key variables in this table are year, month, value, and president. 
 
-# Problem 2
+# Number 2
 ```{r}
+mrtrashwheel = read_excel(
+  "202409 Trash Wheel Collection Data.xlsx", sheet = "Mr. Trash Wheel", na = c("NA",".", "")
+  ) |> 
+  janitor::clean_names() |> 
+  filter(!is.na(dumpster)) |> 
+  select(-"x15", -"x16") |> 
+  mutate(sports_balls = as.integer(round(sports_balls)))
 
+mrtrashwheel
+```
+```{r}
+professortrashwheel = read_excel(
+  "202409 Trash Wheel Collection Data.xlsx", sheet = "Professor Trash Wheel", na = c("NA",".", "")
+  ) |> 
+  janitor::clean_names() |> 
+  slice(1:(n() - 3)) # remove 3 last rows from the bottom
+
+professortrashwheel
+```
+```{r}
+gwynndatrashwheel = read_excel(
+  "202409 Trash Wheel Collection Data.xlsx", sheet = "Gwynnda Trash Wheel", na = c("NA",".", "")
+  ) |> 
+  janitor::clean_names() |> 
+  slice(1:(n() - 1))
+
+gwynndatrashwheel
+```
+```{r}
+mrtrashwheel = mrtrashwheel |> 
+  mutate(trashwheel = "mrtrashwheel")
+professortrashwheel = professortrashwheel |> 
+  mutate(trashwheel = "professortrashwheel") 
+gwynndatrashwheel = gwynndatrashwheel |> 
+  mutate(trashwheel = "gwynndatrashwheel" )
+
+
+mrtrashwheel = mrtrashwheel |> 
+  mutate(year = as.integer(year))
+professortrashwheel = professortrashwheel |> 
+  mutate(year = as.integer(year))
+gwynndatrashwheel = gwynndatrashwheel |> 
+  mutate(year = as.integer(year))
+
+mrtrashwheel
+professortrashwheel
+gwynndatrashwheel
+
+
+```
+Binding the datasets:
+```{r}
+trash_wheels = bind_rows(mrtrashwheel, professortrashwheel, gwynndatrashwheel)
+trash_wheels
+
+```
+
+After cleaning, the dataset contains `r nrow(trash_wheels)` observations.  
+Key variables include *year*, which ranges from `r min(pull(trash_wheels, year))` to `r max(pull(trash_wheels, year))`,  
+and *dumpster*, *weight_tone*, which represents the weight in tons, and *cigarette_buts*.
+
+For available data, the total weight of trash collected by Professor Trash Wheel was  
+`r trash_wheels |> filter(trashwheel == "professortrashwheel") |> summarise(total = sum(weight_tons, na.rm = TRUE)) |> pull(total)` tons.  
+
+In addition, the total number of cigarette butts collected by Gwynnda in June 2022 was  
+`r trash_wheels |> filter(trashwheel == "gwynndatrashwheel", month == "June", year == 2022) |> summarise(total = sum(cigarette_butts, na.rm = TRUE)) |> pull(total)`.
+
+
+
+
+
+```{r}
+#3. remove usless columns statefibs, filedate, there are 2 repeated zipcodes, bronx and new york, kings and new york, drop county, got rid of state names, city, metro, get rid of region type. rename region name to zip code, you should pivot longer
 ```
 
