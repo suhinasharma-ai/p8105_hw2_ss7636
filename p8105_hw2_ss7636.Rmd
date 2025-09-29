@@ -13,14 +13,15 @@ library(tidyverse)
 library(readxl)
 ```
 
+#Number 1
 ```{r}
-data = 
+pols = 
  read_csv("fivethirtyeight_datasets/pols-month.csv", na = c("NA",".", ""))
 
-data
+pols
 ```
 ```{r}
-data |> 
+pols = pols |> 
   separate(mon, into = c("year", "month", "day"), sep = "-") |> 
   mutate(
     month = month.name[as.integer(month)]
@@ -31,8 +32,70 @@ data |>
     prez_dem == 1 ~ "dem"
     )) |> 
   select(-prez_gop, -prez_dem, -day)
-    
+  
 
 ```
 
+```{r}
+snap = 
+ read_csv("fivethirtyeight_datasets/snp.csv", na = c("NA",".", ""))
+
+snap
+```
+```{r}
+snap = snap |> 
+  separate(date, into = c("month", "day", "year"), sep = "/") |> 
+  mutate(
+    month = month.name[as.integer(month)]
+    ) |> 
+  mutate(year = paste0("20", year)) |> 
+  relocate(year, month, day, close)
+```
+
+```{r}
+unemployment = 
+ read_csv("fivethirtyeight_datasets/unemployment.csv", na = c("NA",".", "")) |> 
+ janitor :: clean_names() |> 
+  pivot_longer(
+    cols = jan:dec,       # all the month columns
+    names_to = "month",   # new column name for the keys
+    values_to = "value"   # new column name for the values
+  ) |> 
+  mutate(month = case_match(
+    month,
+    "jan" ~ "January",
+    "feb" ~ "February",
+    "mar" ~ "March",
+    "apr" ~ "April",
+    "may" ~ "May",
+    "jun" ~ "June",
+    "jul" ~ "July",
+    "aug" ~ "August",
+    "sep" ~ "September",
+    "oct" ~ "October",
+    "nov" ~ "November",
+    "dec" ~ "December"
+  ))
+
+unemployment
+```
+
+#Joining the datasets:
+```{r}
+joined_df_pols_snap = inner_join(pols, snap, by = c("year", "month")) |> 
+  mutate(year = as.numeric(year))
+joined_df_pols_snap
+```
+
+```{r}
+joined_df_pols_snap_unemployment = inner_join(unemployment, joined_df_pols_snap, by = c("year", "month"))
+joined_df_pols_snap_unemployment
+```
+
+The file “pols-month” contains 822 observations of 9 variables related to the number of national politicians who are democratic or republican at any given time. The year started as early as 1947 and goes until 2015. It contained key columns such as, mon: date of the count, prez_gop: indicator of whether the president was republican on the associated date (1 = yes, 0 = no), and prez_dem: indicator of whether the president was democratic on the associated date (1 = yes, 0 = no). The file “snp” contains 787 observations of 2 variables related to Standard & Poor’s stock market index (S&P). The important variables are date: the date of the observation and close: the closing values of the S&P stock index on the associated date. The startng date is around 2000 and the end date is 2050. The file “unemployment” contains 68 observations of 13 variables. It contains the percent of unemployment in a certain month and year. The year starts at 1948 and goes until 2050. The key variables after data tidying is year, month, and value (which shows the percent of unemployed). The joint table has 186 rows and 12 columns. The year starts at 2000 and goes until 2015.  The key variables in this table are year, month, value, and president. 
+
+# Problem 2
+```{r}
+
+```
 

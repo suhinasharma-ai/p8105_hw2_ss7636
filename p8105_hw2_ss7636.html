@@ -367,7 +367,8 @@ display: none;
 ## ✖ dplyr::lag()    masks stats::lag()
 ## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
 <pre class="r"><code>library(readxl)</code></pre>
-<pre class="r"><code>data = 
+<p>#Number 1</p>
+<pre class="r"><code>pols = 
  read_csv(&quot;fivethirtyeight_datasets/pols-month.csv&quot;, na = c(&quot;NA&quot;,&quot;.&quot;, &quot;&quot;))</code></pre>
 <pre><code>## Rows: 822 Columns: 9
 ## ── Column specification ────────────────────────────────────────────────────────
@@ -377,7 +378,7 @@ display: none;
 ## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-<pre class="r"><code>data</code></pre>
+<pre class="r"><code>pols</code></pre>
 <pre><code>## # A tibble: 822 × 9
 ##    mon        prez_gop gov_gop sen_gop rep_gop prez_dem gov_dem sen_dem rep_dem
 ##    &lt;date&gt;        &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
@@ -392,7 +393,7 @@ display: none;
 ##  9 1947-09-15        0      23      51     253        1      23      45     198
 ## 10 1947-10-15        0      23      51     253        1      23      45     198
 ## # ℹ 812 more rows</code></pre>
-<pre class="r"><code>data |&gt; 
+<pre class="r"><code>pols = pols |&gt; 
   separate(mon, into = c(&quot;year&quot;, &quot;month&quot;, &quot;day&quot;), sep = &quot;-&quot;) |&gt; 
   mutate(
     month = month.name[as.integer(month)]
@@ -403,20 +404,141 @@ display: none;
     prez_dem == 1 ~ &quot;dem&quot;
     )) |&gt; 
   select(-prez_gop, -prez_dem, -day)</code></pre>
-<pre><code>## # A tibble: 822 × 9
-##    year  month     gov_gop sen_gop rep_gop gov_dem sen_dem rep_dem president
-##    &lt;chr&gt; &lt;chr&gt;       &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;    
-##  1 1947  January        23      51     253      23      45     198 dem      
-##  2 1947  February       23      51     253      23      45     198 dem      
-##  3 1947  March          23      51     253      23      45     198 dem      
-##  4 1947  April          23      51     253      23      45     198 dem      
-##  5 1947  May            23      51     253      23      45     198 dem      
-##  6 1947  June           23      51     253      23      45     198 dem      
-##  7 1947  July           23      51     253      23      45     198 dem      
-##  8 1947  August         23      51     253      23      45     198 dem      
-##  9 1947  September      23      51     253      23      45     198 dem      
-## 10 1947  October        23      51     253      23      45     198 dem      
-## # ℹ 812 more rows</code></pre>
+<pre class="r"><code>snap = 
+ read_csv(&quot;fivethirtyeight_datasets/snp.csv&quot;, na = c(&quot;NA&quot;,&quot;.&quot;, &quot;&quot;))</code></pre>
+<pre><code>## Rows: 787 Columns: 2
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr (1): date
+## dbl (1): close
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code>snap</code></pre>
+<pre><code>## # A tibble: 787 × 2
+##    date    close
+##    &lt;chr&gt;   &lt;dbl&gt;
+##  1 7/1/15  2080.
+##  2 6/1/15  2063.
+##  3 5/1/15  2107.
+##  4 4/1/15  2086.
+##  5 3/2/15  2068.
+##  6 2/2/15  2104.
+##  7 1/2/15  1995.
+##  8 12/1/14 2059.
+##  9 11/3/14 2068.
+## 10 10/1/14 2018.
+## # ℹ 777 more rows</code></pre>
+<pre class="r"><code>snap = snap |&gt; 
+  separate(date, into = c(&quot;month&quot;, &quot;day&quot;, &quot;year&quot;), sep = &quot;/&quot;) |&gt; 
+  mutate(
+    month = month.name[as.integer(month)]
+    ) |&gt; 
+  mutate(year = paste0(&quot;20&quot;, year)) |&gt; 
+  relocate(year, month, day, close)</code></pre>
+<pre class="r"><code>unemployment = 
+ read_csv(&quot;fivethirtyeight_datasets/unemployment.csv&quot;, na = c(&quot;NA&quot;,&quot;.&quot;, &quot;&quot;)) |&gt; 
+ janitor :: clean_names() |&gt; 
+  pivot_longer(
+    cols = jan:dec,       # all the month columns
+    names_to = &quot;month&quot;,   # new column name for the keys
+    values_to = &quot;value&quot;   # new column name for the values
+  ) |&gt; 
+  mutate(month = case_match(
+    month,
+    &quot;jan&quot; ~ &quot;January&quot;,
+    &quot;feb&quot; ~ &quot;February&quot;,
+    &quot;mar&quot; ~ &quot;March&quot;,
+    &quot;apr&quot; ~ &quot;April&quot;,
+    &quot;may&quot; ~ &quot;May&quot;,
+    &quot;jun&quot; ~ &quot;June&quot;,
+    &quot;jul&quot; ~ &quot;July&quot;,
+    &quot;aug&quot; ~ &quot;August&quot;,
+    &quot;sep&quot; ~ &quot;September&quot;,
+    &quot;oct&quot; ~ &quot;October&quot;,
+    &quot;nov&quot; ~ &quot;November&quot;,
+    &quot;dec&quot; ~ &quot;December&quot;
+  ))</code></pre>
+<pre><code>## Rows: 68 Columns: 13
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## dbl (13): Year, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code>unemployment</code></pre>
+<pre><code>## # A tibble: 816 × 3
+##     year month     value
+##    &lt;dbl&gt; &lt;chr&gt;     &lt;dbl&gt;
+##  1  1948 January     3.4
+##  2  1948 February    3.8
+##  3  1948 March       4  
+##  4  1948 April       3.9
+##  5  1948 May         3.5
+##  6  1948 June        3.6
+##  7  1948 July        3.6
+##  8  1948 August      3.9
+##  9  1948 September   3.8
+## 10  1948 October     3.7
+## # ℹ 806 more rows</code></pre>
+<p>#Joining the datasets:</p>
+<pre class="r"><code>joined_df_pols_snap = inner_join(pols, snap, by = c(&quot;year&quot;, &quot;month&quot;)) |&gt; 
+  mutate(year = as.numeric(year))
+joined_df_pols_snap</code></pre>
+<pre><code>## # A tibble: 186 × 11
+##     year month   gov_gop sen_gop rep_gop gov_dem sen_dem rep_dem president day  
+##    &lt;dbl&gt; &lt;chr&gt;     &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;     &lt;chr&gt;
+##  1  2000 January      30      55     223      18      45     210 dem       3    
+##  2  2000 Februa…      30      55     223      18      45     210 dem       1    
+##  3  2000 March        30      55     223      18      45     210 dem       1    
+##  4  2000 April        30      55     223      18      45     210 dem       3    
+##  5  2000 May          30      55     223      18      45     210 dem       1    
+##  6  2000 June         30      55     223      18      45     210 dem       1    
+##  7  2000 July         30      55     223      18      45     210 dem       3    
+##  8  2000 August       30      55     223      18      46     210 dem       1    
+##  9  2000 Septem…      30      55     223      18      46     210 dem       1    
+## 10  2000 October      30      55     223      18      46     210 dem       2    
+## # ℹ 176 more rows
+## # ℹ 1 more variable: close &lt;dbl&gt;</code></pre>
+<pre class="r"><code>joined_df_pols_snap_unemployment = inner_join(unemployment, joined_df_pols_snap, by = c(&quot;year&quot;, &quot;month&quot;))
+joined_df_pols_snap_unemployment</code></pre>
+<pre><code>## # A tibble: 186 × 12
+##     year month   value gov_gop sen_gop rep_gop gov_dem sen_dem rep_dem president
+##    &lt;dbl&gt; &lt;chr&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;    
+##  1  2000 January   4        30      55     223      18      45     210 dem      
+##  2  2000 Februa…   4.1      30      55     223      18      45     210 dem      
+##  3  2000 March     4        30      55     223      18      45     210 dem      
+##  4  2000 April     3.8      30      55     223      18      45     210 dem      
+##  5  2000 May       4        30      55     223      18      45     210 dem      
+##  6  2000 June      4        30      55     223      18      45     210 dem      
+##  7  2000 July      4        30      55     223      18      45     210 dem      
+##  8  2000 August    4.1      30      55     223      18      46     210 dem      
+##  9  2000 Septem…   3.9      30      55     223      18      46     210 dem      
+## 10  2000 October   3.9      30      55     223      18      46     210 dem      
+## # ℹ 176 more rows
+## # ℹ 2 more variables: day &lt;chr&gt;, close &lt;dbl&gt;</code></pre>
+<p>The file “pols-month” contains 822 observations of 9 variables
+related to the number of national politicians who are democratic or
+republican at any given time. The year started as early as 1947 and goes
+until 2015. It contained key columns such as, mon: date of the count,
+prez_gop: indicator of whether the president was republican on the
+associated date (1 = yes, 0 = no), and prez_dem: indicator of whether
+the president was democratic on the associated date (1 = yes, 0 = no).
+The file “snp” contains 787 observations of 2 variables related to
+Standard &amp; Poor’s stock market index (S&amp;P). The important
+variables are date: the date of the observation and close: the closing
+values of the S&amp;P stock index on the associated date. The startng
+date is around 2000 and the end date is 2050. The file “unemployment”
+contains 68 observations of 13 variables. It contains the percent of
+unemployment in a certain month and year. The year starts at 1948 and
+goes until 2050. The key variables after data tidying is year, month,
+and value (which shows the percent of unemployed). The joint table has
+186 rows and 12 columns. The year starts at 2000 and goes until 2015.
+The key variables in this table are year, month, value, and
+president.</p>
+<div id="problem-2" class="section level1">
+<h1>Problem 2</h1>
+</div>
 
 
 
