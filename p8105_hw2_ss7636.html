@@ -367,9 +367,10 @@ display: none;
 ## ✖ dplyr::lag()    masks stats::lag()
 ## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
 <pre class="r"><code>library(readxl)</code></pre>
-<div id="number-1" class="section level1">
-<h1>Number 1</h1>
-<pre class="r"><code>pols = 
+<div id="problem-1" class="section level1">
+<h1>Problem 1</h1>
+<pre class="r"><code>#Importing original pols dataset and study it.
+pols = 
  read_csv(&quot;fivethirtyeight_datasets/pols-month.csv&quot;, na = c(&quot;NA&quot;,&quot;.&quot;, &quot;&quot;))</code></pre>
 <pre><code>## Rows: 822 Columns: 9
 ## ── Column specification ────────────────────────────────────────────────────────
@@ -394,7 +395,9 @@ display: none;
 ##  9 1947-09-15        0      23      51     253        1      23      45     198
 ## 10 1947-10-15        0      23      51     253        1      23      45     198
 ## # ℹ 812 more rows</code></pre>
-<pre class="r"><code>pols = pols |&gt; 
+<pre class="r"><code>#Cleaning the data. Separating the mon column into year, month, day. Adding a new column preseident to show the values of prez_gop and prez_dem. Removing the prez_gop and prez_dem column names.
+pols = 
+ read_csv(&quot;fivethirtyeight_datasets/pols-month.csv&quot;, na = c(&quot;NA&quot;,&quot;.&quot;, &quot;&quot;)) |&gt; 
   separate(mon, into = c(&quot;year&quot;, &quot;month&quot;, &quot;day&quot;), sep = &quot;-&quot;) |&gt; 
   mutate(
     month = month.name[as.integer(month)],
@@ -405,9 +408,16 @@ display: none;
     prez_gop == 1 | 2 ~ &quot;gop&quot;,  #there are some values of gop that have 2, we need to account for this.
     prez_dem == 1 ~ &quot;dem&quot;
     )) |&gt; 
-  select(-prez_gop, -prez_dem, -day)
-  
-pols</code></pre>
+  select(-prez_gop, -prez_dem, -day)</code></pre>
+<pre><code>## Rows: 822 Columns: 9
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## dbl  (8): prez_gop, gov_gop, sen_gop, rep_gop, prez_dem, gov_dem, sen_dem, r...
+## date (1): mon
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code>pols</code></pre>
 <pre><code>## # A tibble: 822 × 9
 ##     year month     gov_gop sen_gop rep_gop gov_dem sen_dem rep_dem president
 ##    &lt;dbl&gt; &lt;chr&gt;       &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;    
@@ -422,7 +432,8 @@ pols</code></pre>
 ##  9  1947 September      23      51     253      23      45     198 gop      
 ## 10  1947 October        23      51     253      23      45     198 gop      
 ## # ℹ 812 more rows</code></pre>
-<pre class="r"><code>snp = 
+<pre class="r"><code>#Importing original snap dataset and study it.
+snp = 
  read_csv(&quot;fivethirtyeight_datasets/snp.csv&quot;, na = c(&quot;NA&quot;,&quot;.&quot;, &quot;&quot;))</code></pre>
 <pre><code>## Rows: 787 Columns: 2
 ## ── Column specification ────────────────────────────────────────────────────────
@@ -447,7 +458,9 @@ pols</code></pre>
 ##  9 11/3/14 2068.
 ## 10 10/1/14 2018.
 ## # ℹ 777 more rows</code></pre>
-<pre class="r"><code>snp = snp |&gt; 
+<pre class="r"><code>#Clean snp dataset. Separate date into month, day, and year. Add 1900 or 2000 to year depending on the case. Remove day variable and change order of columns.
+snp = 
+ read_csv(&quot;fivethirtyeight_datasets/snp.csv&quot;, na = c(&quot;NA&quot;,&quot;.&quot;, &quot;&quot;)) |&gt;  
   separate(date, into = c(&quot;month&quot;, &quot;day&quot;, &quot;year&quot;), sep = &quot;/&quot;) |&gt; 
   mutate(
     month = month.name[as.integer(month)],
@@ -457,30 +470,40 @@ pols</code></pre>
     year &gt; 15 ~ year + 1900, # from 40-99, add 1900 to the year
     year &lt;= 15 ~ year + 2000 # from 00-15, add 2000 to year
   )) |&gt; 
-  relocate(year, month, day, close)
-
-snp</code></pre>
-<pre><code>## # A tibble: 787 × 4
-##     year month    day   close
-##    &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt; &lt;dbl&gt;
-##  1  2015 July     1     2080.
-##  2  2015 June     1     2063.
-##  3  2015 May      1     2107.
-##  4  2015 April    1     2086.
-##  5  2015 March    2     2068.
-##  6  2015 February 2     2104.
-##  7  2015 January  2     1995.
-##  8  2014 December 1     2059.
-##  9  2014 November 3     2068.
-## 10  2014 October  1     2018.
+  relocate(year, month, day, close) |&gt; 
+  select(-&quot;day&quot;)</code></pre>
+<pre><code>## Rows: 787 Columns: 2
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr (1): date
+## dbl (1): close
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code>snp</code></pre>
+<pre><code>## # A tibble: 787 × 3
+##     year month    close
+##    &lt;dbl&gt; &lt;chr&gt;    &lt;dbl&gt;
+##  1  2015 July     2080.
+##  2  2015 June     2063.
+##  3  2015 May      2107.
+##  4  2015 April    2086.
+##  5  2015 March    2068.
+##  6  2015 February 2104.
+##  7  2015 January  1995.
+##  8  2014 December 2059.
+##  9  2014 November 2068.
+## 10  2014 October  2018.
 ## # ℹ 777 more rows</code></pre>
-<pre class="r"><code>unemployment = 
+<pre class="r"><code>#Clean unemployment dataset. Pivot longer date format, and mutate to show the full month name.
+
+unemployment = 
  read_csv(&quot;fivethirtyeight_datasets/unemployment.csv&quot;, na = c(&quot;NA&quot;,&quot;.&quot;, &quot;&quot;)) |&gt; 
  janitor :: clean_names() |&gt; 
   pivot_longer(
     cols = jan:dec,       # all the month columns
     names_to = &quot;month&quot;,   # new column name for the keys
-    values_to = &quot;value&quot;   # new column name for the values
+    values_to = &quot;percent unemployment&quot;   # new column name for the values
   ) |&gt; 
   mutate(month = case_match(
     month,
@@ -506,56 +529,55 @@ snp</code></pre>
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 <pre class="r"><code>unemployment</code></pre>
 <pre><code>## # A tibble: 816 × 3
-##     year month     value
-##    &lt;dbl&gt; &lt;chr&gt;     &lt;dbl&gt;
-##  1  1948 January     3.4
-##  2  1948 February    3.8
-##  3  1948 March       4  
-##  4  1948 April       3.9
-##  5  1948 May         3.5
-##  6  1948 June        3.6
-##  7  1948 July        3.6
-##  8  1948 August      3.9
-##  9  1948 September   3.8
-## 10  1948 October     3.7
+##     year month     `percent unemployment`
+##    &lt;dbl&gt; &lt;chr&gt;                      &lt;dbl&gt;
+##  1  1948 January                      3.4
+##  2  1948 February                     3.8
+##  3  1948 March                        4  
+##  4  1948 April                        3.9
+##  5  1948 May                          3.5
+##  6  1948 June                         3.6
+##  7  1948 July                         3.6
+##  8  1948 August                       3.9
+##  9  1948 September                    3.8
+## 10  1948 October                      3.7
 ## # ℹ 806 more rows</code></pre>
 <p>Joining the datasets:</p>
 <pre class="r"><code>joined_df_pols_snap = left_join(pols, snp, by = c(&quot;year&quot;, &quot;month&quot;)) |&gt; 
   mutate(year = as.numeric(year))
 joined_df_pols_snap</code></pre>
-<pre><code>## # A tibble: 822 × 11
-##     year month   gov_gop sen_gop rep_gop gov_dem sen_dem rep_dem president day  
-##    &lt;dbl&gt; &lt;chr&gt;     &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;     &lt;chr&gt;
-##  1  1947 January      23      51     253      23      45     198 gop       &lt;NA&gt; 
-##  2  1947 Februa…      23      51     253      23      45     198 gop       &lt;NA&gt; 
-##  3  1947 March        23      51     253      23      45     198 gop       &lt;NA&gt; 
-##  4  1947 April        23      51     253      23      45     198 gop       &lt;NA&gt; 
-##  5  1947 May          23      51     253      23      45     198 gop       &lt;NA&gt; 
-##  6  1947 June         23      51     253      23      45     198 gop       &lt;NA&gt; 
-##  7  1947 July         23      51     253      23      45     198 gop       &lt;NA&gt; 
-##  8  1947 August       23      51     253      23      45     198 gop       &lt;NA&gt; 
-##  9  1947 Septem…      23      51     253      23      45     198 gop       &lt;NA&gt; 
-## 10  1947 October      23      51     253      23      45     198 gop       &lt;NA&gt; 
-## # ℹ 812 more rows
-## # ℹ 1 more variable: close &lt;dbl&gt;</code></pre>
+<pre><code>## # A tibble: 822 × 10
+##     year month   gov_gop sen_gop rep_gop gov_dem sen_dem rep_dem president close
+##    &lt;dbl&gt; &lt;chr&gt;     &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;     &lt;dbl&gt;
+##  1  1947 January      23      51     253      23      45     198 gop          NA
+##  2  1947 Februa…      23      51     253      23      45     198 gop          NA
+##  3  1947 March        23      51     253      23      45     198 gop          NA
+##  4  1947 April        23      51     253      23      45     198 gop          NA
+##  5  1947 May          23      51     253      23      45     198 gop          NA
+##  6  1947 June         23      51     253      23      45     198 gop          NA
+##  7  1947 July         23      51     253      23      45     198 gop          NA
+##  8  1947 August       23      51     253      23      45     198 gop          NA
+##  9  1947 Septem…      23      51     253      23      45     198 gop          NA
+## 10  1947 October      23      51     253      23      45     198 gop          NA
+## # ℹ 812 more rows</code></pre>
 <pre class="r"><code> # put bigger table first (what information is more important to keep).</code></pre>
 <pre class="r"><code>joined_df_pols_snap_unemployment = left_join(joined_df_pols_snap, unemployment, by = c(&quot;year&quot;, &quot;month&quot;))
 joined_df_pols_snap_unemployment </code></pre>
-<pre><code>## # A tibble: 822 × 12
-##     year month   gov_gop sen_gop rep_gop gov_dem sen_dem rep_dem president day  
-##    &lt;dbl&gt; &lt;chr&gt;     &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;     &lt;chr&gt;
-##  1  1947 January      23      51     253      23      45     198 gop       &lt;NA&gt; 
-##  2  1947 Februa…      23      51     253      23      45     198 gop       &lt;NA&gt; 
-##  3  1947 March        23      51     253      23      45     198 gop       &lt;NA&gt; 
-##  4  1947 April        23      51     253      23      45     198 gop       &lt;NA&gt; 
-##  5  1947 May          23      51     253      23      45     198 gop       &lt;NA&gt; 
-##  6  1947 June         23      51     253      23      45     198 gop       &lt;NA&gt; 
-##  7  1947 July         23      51     253      23      45     198 gop       &lt;NA&gt; 
-##  8  1947 August       23      51     253      23      45     198 gop       &lt;NA&gt; 
-##  9  1947 Septem…      23      51     253      23      45     198 gop       &lt;NA&gt; 
-## 10  1947 October      23      51     253      23      45     198 gop       &lt;NA&gt; 
+<pre><code>## # A tibble: 822 × 11
+##     year month   gov_gop sen_gop rep_gop gov_dem sen_dem rep_dem president close
+##    &lt;dbl&gt; &lt;chr&gt;     &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;     &lt;dbl&gt;
+##  1  1947 January      23      51     253      23      45     198 gop          NA
+##  2  1947 Februa…      23      51     253      23      45     198 gop          NA
+##  3  1947 March        23      51     253      23      45     198 gop          NA
+##  4  1947 April        23      51     253      23      45     198 gop          NA
+##  5  1947 May          23      51     253      23      45     198 gop          NA
+##  6  1947 June         23      51     253      23      45     198 gop          NA
+##  7  1947 July         23      51     253      23      45     198 gop          NA
+##  8  1947 August       23      51     253      23      45     198 gop          NA
+##  9  1947 Septem…      23      51     253      23      45     198 gop          NA
+## 10  1947 October      23      51     253      23      45     198 gop          NA
 ## # ℹ 812 more rows
-## # ℹ 2 more variables: close &lt;dbl&gt;, value &lt;dbl&gt;</code></pre>
+## # ℹ 1 more variable: `percent unemployment` &lt;dbl&gt;</code></pre>
 <p>The file “pols-month” contains 822 observations of 9 variables
 related to the number of national politicians who are democratic or
 republican at any given time. The year started as early as 1947 and goes
@@ -572,24 +594,25 @@ end year is 2015. The file “unemployment” contains 68 observations of 13
 variables. It contains the percent of unemployment in a certain month
 and year. The year starts at 1948 and goes until 2015. The key variables
 after data tidying is year, month, and value (which shows the percent of
-unemployed). The joint table has 822 rows and 12 columns. The year
+unemployed). The joint table has 822 rows and 11 columns. The year
 starts at 1947 and goes until 2015. The key variables in this table are
-year, month, value, and president.</p>
+year, month, percent of unemployment, and president.</p>
 </div>
-<div id="number-2" class="section level1">
-<h1>Number 2</h1>
-<pre class="r"><code>mrtrashwheel = read_excel(
-  &quot;202409 Trash Wheel Collection Data.xlsx&quot;, sheet = &quot;Mr. Trash Wheel&quot;, na = c(&quot;NA&quot;,&quot;.&quot;, &quot;&quot;)
+<div id="problem-2" class="section level1">
+<h1>Problem 2</h1>
+<pre class="r"><code>#Import excel file for Mr. Trash Wheel, drop NA dumpster rows. Remove x15 and x16 columns. Round sports_balls.
+mrtrashwheel = read_excel(
+  &quot;202509 Trash Wheel Collection Data.xlsx&quot;, sheet = &quot;Mr. Trash Wheel&quot;, na = c(&quot;NA&quot;,&quot;.&quot;, &quot;&quot;)
   ) |&gt; 
   janitor::clean_names() |&gt; 
-  filter(!is.na(dumpster)) |&gt; 
+  drop_na(dumpster) |&gt; 
   select(-&quot;x15&quot;, -&quot;x16&quot;) |&gt; 
   mutate(sports_balls = as.integer(round(sports_balls)))</code></pre>
 <pre><code>## New names:
 ## • `` -&gt; `...15`
 ## • `` -&gt; `...16`</code></pre>
 <pre class="r"><code>mrtrashwheel</code></pre>
-<pre><code>## # A tibble: 651 × 14
+<pre><code>## # A tibble: 707 × 14
 ##    dumpster month year  date                weight_tons volume_cubic_yards
 ##       &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt; &lt;dttm&gt;                    &lt;dbl&gt;              &lt;dbl&gt;
 ##  1        1 May   2014  2014-05-16 00:00:00        4.31                 18
@@ -602,18 +625,20 @@ year, month, value, and president.</p>
 ##  8        8 May   2014  2014-05-28 00:00:00        3.7                  16
 ##  9        9 June  2014  2014-06-05 00:00:00        2.52                 14
 ## 10       10 June  2014  2014-06-11 00:00:00        3.76                 18
-## # ℹ 641 more rows
+## # ℹ 697 more rows
 ## # ℹ 8 more variables: plastic_bottles &lt;dbl&gt;, polystyrene &lt;dbl&gt;,
 ## #   cigarette_butts &lt;dbl&gt;, glass_bottles &lt;dbl&gt;, plastic_bags &lt;dbl&gt;,
 ## #   wrappers &lt;dbl&gt;, sports_balls &lt;int&gt;, homes_powered &lt;dbl&gt;</code></pre>
-<pre class="r"><code>professortrashwheel = read_excel(
-  &quot;202409 Trash Wheel Collection Data.xlsx&quot;, sheet = &quot;Professor Trash Wheel&quot;, na = c(&quot;NA&quot;,&quot;.&quot;, &quot;&quot;)
+<pre class="r"><code>#Import excel file for Professor. Trash Wheel, drop NA dumpster rows.
+
+professortrashwheel = read_excel(
+  &quot;202509 Trash Wheel Collection Data.xlsx&quot;, sheet = &quot;Professor Trash Wheel&quot;, na = c(&quot;NA&quot;,&quot;.&quot;, &quot;&quot;)
   ) |&gt; 
   janitor::clean_names() |&gt; 
-  slice(1:(n() - 3)) # remove 3 last rows from the bottom
+  drop_na(dumpster)
 
 professortrashwheel</code></pre>
-<pre><code>## # A tibble: 118 × 13
+<pre><code>## # A tibble: 132 × 13
 ##    dumpster month     year date                weight_tons volume_cubic_yards
 ##       &lt;dbl&gt; &lt;chr&gt;    &lt;dbl&gt; &lt;dttm&gt;                    &lt;dbl&gt;              &lt;dbl&gt;
 ##  1        1 January   2017 2017-01-02 00:00:00        1.79                 15
@@ -626,18 +651,20 @@ professortrashwheel</code></pre>
 ##  8        8 April     2017 2017-04-20 00:00:00        2.37                 15
 ##  9        9 May       2017 2017-05-10 00:00:00        2.64                 15
 ## 10       10 May       2017 2017-05-26 00:00:00        2.78                 15
-## # ℹ 108 more rows
+## # ℹ 122 more rows
 ## # ℹ 7 more variables: plastic_bottles &lt;dbl&gt;, polystyrene &lt;dbl&gt;,
 ## #   cigarette_butts &lt;dbl&gt;, glass_bottles &lt;dbl&gt;, plastic_bags &lt;dbl&gt;,
 ## #   wrappers &lt;dbl&gt;, homes_powered &lt;dbl&gt;</code></pre>
-<pre class="r"><code>gwynndatrashwheel = read_excel(
-  &quot;202409 Trash Wheel Collection Data.xlsx&quot;, sheet = &quot;Gwynnda Trash Wheel&quot;, na = c(&quot;NA&quot;,&quot;.&quot;, &quot;&quot;)
+<pre class="r"><code>#Import excel file for Gwynnda Trash Wheel, drop NA dumpster rows.
+
+gwynndatrashwheel = read_excel(
+  &quot;202509 Trash Wheel Collection Data.xlsx&quot;, sheet = &quot;Gwynns Falls Trash Wheel&quot;, na = c(&quot;NA&quot;,&quot;.&quot;, &quot;&quot;)
   ) |&gt; 
   janitor::clean_names() |&gt; 
-  slice(1:(n() - 1))
+  drop_na(dumpster)
 
 gwynndatrashwheel</code></pre>
-<pre><code>## # A tibble: 263 × 12
+<pre><code>## # A tibble: 349 × 12
 ##    dumpster month   year date                weight_tons volume_cubic_yards
 ##       &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;dttm&gt;                    &lt;dbl&gt;              &lt;dbl&gt;
 ##  1        1 July    2021 2021-07-03 00:00:00        0.93                 15
@@ -650,11 +677,13 @@ gwynndatrashwheel</code></pre>
 ##  8        8 August  2021 2021-08-16 00:00:00        2.16                 15
 ##  9        9 August  2021 2021-08-16 00:00:00        2.6                  15
 ## 10       10 August  2021 2021-08-17 00:00:00        3.21                 15
-## # ℹ 253 more rows
+## # ℹ 339 more rows
 ## # ℹ 6 more variables: plastic_bottles &lt;dbl&gt;, polystyrene &lt;dbl&gt;,
 ## #   cigarette_butts &lt;dbl&gt;, plastic_bags &lt;dbl&gt;, wrappers &lt;dbl&gt;,
 ## #   homes_powered &lt;dbl&gt;</code></pre>
-<pre class="r"><code>mrtrashwheel = mrtrashwheel |&gt; 
+<pre class="r"><code>#Add another column called &quot;trashwheel&quot; that describes what trash wheel it is. This will be helpful when we bind the datasets.
+
+mrtrashwheel = mrtrashwheel |&gt; 
   mutate(trashwheel = &quot;mrtrashwheel&quot;)
 professortrashwheel = professortrashwheel |&gt; 
   mutate(trashwheel = &quot;professortrashwheel&quot;) 
@@ -670,7 +699,7 @@ gwynndatrashwheel = gwynndatrashwheel |&gt;
   mutate(year = as.integer(year))
 
 mrtrashwheel</code></pre>
-<pre><code>## # A tibble: 651 × 15
+<pre><code>## # A tibble: 707 × 15
 ##    dumpster month  year date                weight_tons volume_cubic_yards
 ##       &lt;dbl&gt; &lt;chr&gt; &lt;int&gt; &lt;dttm&gt;                    &lt;dbl&gt;              &lt;dbl&gt;
 ##  1        1 May    2014 2014-05-16 00:00:00        4.31                 18
@@ -683,12 +712,12 @@ mrtrashwheel</code></pre>
 ##  8        8 May    2014 2014-05-28 00:00:00        3.7                  16
 ##  9        9 June   2014 2014-06-05 00:00:00        2.52                 14
 ## 10       10 June   2014 2014-06-11 00:00:00        3.76                 18
-## # ℹ 641 more rows
+## # ℹ 697 more rows
 ## # ℹ 9 more variables: plastic_bottles &lt;dbl&gt;, polystyrene &lt;dbl&gt;,
 ## #   cigarette_butts &lt;dbl&gt;, glass_bottles &lt;dbl&gt;, plastic_bags &lt;dbl&gt;,
 ## #   wrappers &lt;dbl&gt;, sports_balls &lt;int&gt;, homes_powered &lt;dbl&gt;, trashwheel &lt;chr&gt;</code></pre>
 <pre class="r"><code>professortrashwheel</code></pre>
-<pre><code>## # A tibble: 118 × 14
+<pre><code>## # A tibble: 132 × 14
 ##    dumpster month     year date                weight_tons volume_cubic_yards
 ##       &lt;dbl&gt; &lt;chr&gt;    &lt;int&gt; &lt;dttm&gt;                    &lt;dbl&gt;              &lt;dbl&gt;
 ##  1        1 January   2017 2017-01-02 00:00:00        1.79                 15
@@ -701,12 +730,12 @@ mrtrashwheel</code></pre>
 ##  8        8 April     2017 2017-04-20 00:00:00        2.37                 15
 ##  9        9 May       2017 2017-05-10 00:00:00        2.64                 15
 ## 10       10 May       2017 2017-05-26 00:00:00        2.78                 15
-## # ℹ 108 more rows
+## # ℹ 122 more rows
 ## # ℹ 8 more variables: plastic_bottles &lt;dbl&gt;, polystyrene &lt;dbl&gt;,
 ## #   cigarette_butts &lt;dbl&gt;, glass_bottles &lt;dbl&gt;, plastic_bags &lt;dbl&gt;,
 ## #   wrappers &lt;dbl&gt;, homes_powered &lt;dbl&gt;, trashwheel &lt;chr&gt;</code></pre>
 <pre class="r"><code>gwynndatrashwheel</code></pre>
-<pre><code>## # A tibble: 263 × 13
+<pre><code>## # A tibble: 349 × 13
 ##    dumpster month   year date                weight_tons volume_cubic_yards
 ##       &lt;dbl&gt; &lt;chr&gt;  &lt;int&gt; &lt;dttm&gt;                    &lt;dbl&gt;              &lt;dbl&gt;
 ##  1        1 July    2021 2021-07-03 00:00:00        0.93                 15
@@ -719,14 +748,14 @@ mrtrashwheel</code></pre>
 ##  8        8 August  2021 2021-08-16 00:00:00        2.16                 15
 ##  9        9 August  2021 2021-08-16 00:00:00        2.6                  15
 ## 10       10 August  2021 2021-08-17 00:00:00        3.21                 15
-## # ℹ 253 more rows
+## # ℹ 339 more rows
 ## # ℹ 7 more variables: plastic_bottles &lt;dbl&gt;, polystyrene &lt;dbl&gt;,
 ## #   cigarette_butts &lt;dbl&gt;, plastic_bags &lt;dbl&gt;, wrappers &lt;dbl&gt;,
 ## #   homes_powered &lt;dbl&gt;, trashwheel &lt;chr&gt;</code></pre>
 <p>Binding the datasets:</p>
 <pre class="r"><code>trash_wheels = bind_rows(mrtrashwheel, professortrashwheel, gwynndatrashwheel)
 trash_wheels</code></pre>
-<pre><code>## # A tibble: 1,032 × 15
+<pre><code>## # A tibble: 1,188 × 15
 ##    dumpster month  year date                weight_tons volume_cubic_yards
 ##       &lt;dbl&gt; &lt;chr&gt; &lt;int&gt; &lt;dttm&gt;                    &lt;dbl&gt;              &lt;dbl&gt;
 ##  1        1 May    2014 2014-05-16 00:00:00        4.31                 18
@@ -739,22 +768,321 @@ trash_wheels</code></pre>
 ##  8        8 May    2014 2014-05-28 00:00:00        3.7                  16
 ##  9        9 June   2014 2014-06-05 00:00:00        2.52                 14
 ## 10       10 June   2014 2014-06-11 00:00:00        3.76                 18
-## # ℹ 1,022 more rows
+## # ℹ 1,178 more rows
 ## # ℹ 9 more variables: plastic_bottles &lt;dbl&gt;, polystyrene &lt;dbl&gt;,
 ## #   cigarette_butts &lt;dbl&gt;, glass_bottles &lt;dbl&gt;, plastic_bags &lt;dbl&gt;,
 ## #   wrappers &lt;dbl&gt;, sports_balls &lt;int&gt;, homes_powered &lt;dbl&gt;, trashwheel &lt;chr&gt;</code></pre>
-<p>After cleaning, the dataset contains 1032 observations.<br />
+<p>After cleaning, the dataset contains 1188 observations.<br />
 Key variables include <em>year</em>, which ranges from 2014 to
-2024,<br />
+2025,<br />
 and <em>dumpster</em>, <em>weight_tone</em>, which represents the weight
 in tons, and <em>cigarette_buts</em>.</p>
 <p>For available data, the total weight of trash collected by Professor
 Trash Wheel was<br />
-246.74 tons.</p>
+282.26 tons.</p>
 <p>In addition, the total number of cigarette butts collected by Gwynnda
 in June 2022 was<br />
 1.812^{4}.</p>
-<pre class="r"><code>#3. remove usless columns statefibs, filedate, there are 2 repeated zipcodes, bronx and new york, kings and new york, drop county, got rid of state names, city, metro, get rid of region type. rename region name to zip code, you should pivot longer</code></pre>
+</div>
+<div id="problem-3" class="section level1">
+<h1>Problem 3:</h1>
+<pre class="r"><code>#Import and clean zipcodes dataset. Remove irrelevant columns, such as state_fips and file_date. 
+zipcodes = 
+ read_csv(&quot;zillow_data/Zip Codes.csv&quot;, na = c(&quot;NA&quot;,&quot;.&quot;, &quot;&quot;)) |&gt; 
+  janitor :: clean_names() |&gt; 
+  select(-&quot;state_fips&quot;, -&quot;file_date&quot;)  </code></pre>
+<pre><code>## Rows: 322 Columns: 7
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr (4): County, County Code, File Date, Neighborhood
+## dbl (3): State FIPS, County FIPS, ZipCode
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code>zipcodes</code></pre>
+<pre><code>## # A tibble: 322 × 5
+##    county county_code county_fips zip_code neighborhood              
+##    &lt;chr&gt;  &lt;chr&gt;             &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;                     
+##  1 Bronx  005               36005    10451 High Bridge and Morrisania
+##  2 Bronx  005               36005    10452 High Bridge and Morrisania
+##  3 Bronx  005               36005    10453 Central Bronx             
+##  4 Bronx  005               36005    10454 Hunts Point and Mott Haven
+##  5 Bronx  005               36005    10455 Hunts Point and Mott Haven
+##  6 Bronx  005               36005    10456 High Bridge and Morrisania
+##  7 Bronx  005               36005    10457 Central Bronx             
+##  8 Bronx  005               36005    10458 Bronx Park and Fordham    
+##  9 Bronx  005               36005    10459 Hunts Point and Mott Haven
+## 10 Bronx  005               36005    10460 Central Bronx             
+## # ℹ 312 more rows</code></pre>
+<pre class="r"><code>#Import zillow dataset and analyze what needs to be changed.
+zillow = 
+ read_csv(&quot;zillow_data/Zip_zori_uc_sfrcondomfr_sm_month_NYC.csv&quot;, na = c(&quot;NA&quot;,&quot;.&quot;, &quot;&quot;)) |&gt; 
+  janitor:: clean_names() </code></pre>
+<pre><code>## Rows: 149 Columns: 125
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr   (6): RegionType, StateName, State, City, Metro, CountyName
+## dbl (119): RegionID, SizeRank, RegionName, 2015-01-31, 2015-02-28, 2015-03-3...
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code>zillow</code></pre>
+<pre><code>## # A tibble: 149 × 125
+##    region_id size_rank region_name region_type state_name state city     metro  
+##        &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt; &lt;chr&gt;       &lt;chr&gt;      &lt;chr&gt; &lt;chr&gt;    &lt;chr&gt;  
+##  1     62080         4       11368 zip         NY         NY    New York New Yo…
+##  2     62093         7       11385 zip         NY         NY    New York New Yo…
+##  3     62019         9       11208 zip         NY         NY    New York New Yo…
+##  4     62046        16       11236 zip         NY         NY    New York New Yo…
+##  5     61807        17       10467 zip         NY         NY    New York New Yo…
+##  6     62085        18       11373 zip         NY         NY    New York New Yo…
+##  7     62037        19       11226 zip         NY         NY    New York New Yo…
+##  8     62018        20       11207 zip         NY         NY    New York New Yo…
+##  9     61639        29       10025 zip         NY         NY    New York New Yo…
+## 10     62025        32       11214 zip         NY         NY    New York New Yo…
+## # ℹ 139 more rows
+## # ℹ 117 more variables: county_name &lt;chr&gt;, x2015_01_31 &lt;dbl&gt;,
+## #   x2015_02_28 &lt;dbl&gt;, x2015_03_31 &lt;dbl&gt;, x2015_04_30 &lt;dbl&gt;, x2015_05_31 &lt;dbl&gt;,
+## #   x2015_06_30 &lt;dbl&gt;, x2015_07_31 &lt;dbl&gt;, x2015_08_31 &lt;dbl&gt;, x2015_09_30 &lt;dbl&gt;,
+## #   x2015_10_31 &lt;dbl&gt;, x2015_11_30 &lt;dbl&gt;, x2015_12_31 &lt;dbl&gt;, x2016_01_31 &lt;dbl&gt;,
+## #   x2016_02_29 &lt;dbl&gt;, x2016_03_31 &lt;dbl&gt;, x2016_04_30 &lt;dbl&gt;, x2016_05_31 &lt;dbl&gt;,
+## #   x2016_06_30 &lt;dbl&gt;, x2016_07_31 &lt;dbl&gt;, x2016_08_31 &lt;dbl&gt;, …</code></pre>
+<pre class="r"><code>#Clean zillow dataset. Pivot longer the dates, showing the rent values on zillow. Removing irrelelvent columns. Changing the name of region_name to zip_code so it can match up with the name in the zipcodes dataset. Removing the &quot;County&quot; text in the county_name column, so the format can match up with the county names in the zipcodes dataset. Also want to rename county_name to county so I can join the dataset by zipcode and county. 
+zillow = 
+ read_csv(&quot;zillow_data/Zip_zori_uc_sfrcondomfr_sm_month_NYC.csv&quot;, na = c(&quot;NA&quot;,&quot;.&quot;, &quot;&quot;)) |&gt; 
+  janitor:: clean_names() |&gt; 
+  pivot_longer(
+    cols = x2015_01_31:x2024_08_31,       
+    names_to = &quot;date&quot;,  
+    values_to = &quot;zori&quot;   
+  ) |&gt; 
+  mutate(
+    date = str_remove(date, &quot;x&quot;)
+  ) |&gt; 
+  select(-&quot;city&quot;, -&quot;metro&quot;, -&quot;region_type&quot;,  -&quot;state_name&quot;, -&quot;state&quot;) |&gt; 
+  rename(zip_code = region_name) |&gt; 
+  mutate(
+    county_name = str_remove(county_name, &quot; County&quot;)
+  ) |&gt; 
+  rename(county = county_name)</code></pre>
+<pre><code>## Rows: 149 Columns: 125
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr   (6): RegionType, StateName, State, City, Metro, CountyName
+## dbl (119): RegionID, SizeRank, RegionName, 2015-01-31, 2015-02-28, 2015-03-3...
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code>zillow</code></pre>
+<pre><code>## # A tibble: 17,284 × 6
+##    region_id size_rank zip_code county date        zori
+##        &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt;      &lt;dbl&gt;
+##  1     62080         4    11368 Queens 2015_01_31    NA
+##  2     62080         4    11368 Queens 2015_02_28    NA
+##  3     62080         4    11368 Queens 2015_03_31    NA
+##  4     62080         4    11368 Queens 2015_04_30    NA
+##  5     62080         4    11368 Queens 2015_05_31    NA
+##  6     62080         4    11368 Queens 2015_06_30    NA
+##  7     62080         4    11368 Queens 2015_07_31    NA
+##  8     62080         4    11368 Queens 2015_08_31    NA
+##  9     62080         4    11368 Queens 2015_09_30    NA
+## 10     62080         4    11368 Queens 2015_10_31    NA
+## # ℹ 17,274 more rows</code></pre>
+<pre class="r"><code>#Left joining zillow to zipcodes dataset.
+joined_zipcodes_nyc = left_join(zipcodes, zillow, by = c(&quot;zip_code&quot;, &quot;county&quot;))
+joined_zipcodes_nyc</code></pre>
+<pre><code>## # A tibble: 17,342 × 9
+##    county county_code county_fips zip_code neighborhood      region_id size_rank
+##    &lt;chr&gt;  &lt;chr&gt;             &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;                 &lt;dbl&gt;     &lt;dbl&gt;
+##  1 Bronx  005               36005    10451 High Bridge and …     61791       838
+##  2 Bronx  005               36005    10451 High Bridge and …     61791       838
+##  3 Bronx  005               36005    10451 High Bridge and …     61791       838
+##  4 Bronx  005               36005    10451 High Bridge and …     61791       838
+##  5 Bronx  005               36005    10451 High Bridge and …     61791       838
+##  6 Bronx  005               36005    10451 High Bridge and …     61791       838
+##  7 Bronx  005               36005    10451 High Bridge and …     61791       838
+##  8 Bronx  005               36005    10451 High Bridge and …     61791       838
+##  9 Bronx  005               36005    10451 High Bridge and …     61791       838
+## 10 Bronx  005               36005    10451 High Bridge and …     61791       838
+## # ℹ 17,332 more rows
+## # ℹ 2 more variables: date &lt;chr&gt;, zori &lt;dbl&gt;</code></pre>
+<p>The tidy dataset contains 17342 total observations, with 320 unique
+ZIP codes and 43 unique neighborhoods.</p>
+<pre class="r"><code>zip_not_in_zillow = zipcodes |&gt; 
+  anti_join(zillow, by = &quot;zip_code&quot;)
+
+zip_not_in_zillow</code></pre>
+<pre><code>## # A tibble: 171 × 5
+##    county county_code county_fips zip_code neighborhood              
+##    &lt;chr&gt;  &lt;chr&gt;             &lt;dbl&gt;    &lt;dbl&gt; &lt;chr&gt;                     
+##  1 Bronx  005               36005    10464 Southeast Bronx           
+##  2 Bronx  005               36005    10474 Hunts Point and Mott Haven
+##  3 Bronx  005               36005    10475 Northeast Bronx           
+##  4 Bronx  005               36005    10499 &lt;NA&gt;                      
+##  5 Bronx  005               36005    10550 &lt;NA&gt;                      
+##  6 Bronx  005               36005    10704 &lt;NA&gt;                      
+##  7 Bronx  005               36005    10705 &lt;NA&gt;                      
+##  8 Bronx  005               36005    10803 &lt;NA&gt;                      
+##  9 Kings  047               36047    11202 &lt;NA&gt;                      
+## 10 Kings  047               36047    11224 Southern Brooklyn         
+## # ℹ 161 more rows</code></pre>
+<p>It is possible that these zipcodes are not residential, and are
+instead an area of reserve or significant landmarks that would not have
+a rental listing. One example of this would be 10041, as this zip code
+is a portion of the financial district, which has financial sites and
+contains significant landmarks like the New York Stock Exchange and One
+World Trade Center, which would not have a rental listings. Another
+example would be the zipcode 10101. This area includes businesses and
+amenities like restaurants, grocery stores, and cafes. Because this is
+not a residential area, there would not be rental listings.</p>
+<pre class="r"><code>#Creating a table of top 10 rent difference values. Separating date into year, month, day and doing filtering year 2020 or 2021 and month in January. Doing Pivot wider to have the years be their own columns with the rent as the values. Then I compute the difference between 2020 and 2021 rent values, sort by descending order, and only showing the first 10. 
+
+joined_zipcodes_nyc_top_10_rents = joined_zipcodes_nyc |&gt; 
+  separate(date, into = c(&quot;year&quot;, &quot;month&quot;, &quot;day&quot;), sep = &quot;_&quot;) |&gt; 
+  mutate(
+    year = as.integer(year),
+    month = as.integer(month),
+    day = as.integer(day)
+  ) |&gt; 
+  filter((year == 2020 | year == 2021) &amp; month == 1) |&gt; 
+  drop_na(zori) |&gt; 
+  pivot_wider(
+    names_from = year, 
+    values_from = zori) |&gt; 
+  select(-&quot;month&quot;, -&quot;day&quot;) |&gt; 
+  mutate(
+    difference = `2020`-`2021`
+  ) |&gt; 
+  arrange(desc(difference)) |&gt;
+  head(10) |&gt; 
+  select(county, neighborhood, zip_code, `2020`, `2021`, difference)
+
+joined_zipcodes_nyc_top_10_rents</code></pre>
+<pre><code>## # A tibble: 10 × 6
+##    county   neighborhood                  zip_code `2020` `2021` difference
+##    &lt;chr&gt;    &lt;chr&gt;                            &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;      &lt;dbl&gt;
+##  1 New York Lower Manhattan                  10007  6334.  5422.       913.
+##  2 New York &lt;NA&gt;                             10069  4623.  3875.       748.
+##  3 New York Lower East Side                  10009  3406.  2692.       714.
+##  4 New York Gramercy Park and Murray Hill    10016  3731.  3019.       712.
+##  5 New York Chelsea and Clinton              10001  4108.  3398.       710.
+##  6 New York Lower East Side                  10002  3645.  2935.       710.
+##  7 New York Lower Manhattan                  10004  3150.  2444.       706.
+##  8 New York Lower Manhattan                  10038  3573.  2876.       698.
+##  9 New York Greenwich Village and Soho       10012  3629.  2942.       686.
+## 10 New York Gramercy Park and Murray Hill    10010  3697.  3012.       685.</code></pre>
+<p>Create a table</p>
+<pre class="r"><code>knitr::kable(joined_zipcodes_nyc_top_10_rents)</code></pre>
+<table style="width:100%;">
+<colgroup>
+<col width="11%" />
+<col width="38%" />
+<col width="11%" />
+<col width="11%" />
+<col width="11%" />
+<col width="14%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">county</th>
+<th align="left">neighborhood</th>
+<th align="right">zip_code</th>
+<th align="right">2020</th>
+<th align="right">2021</th>
+<th align="right">difference</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">New York</td>
+<td align="left">Lower Manhattan</td>
+<td align="right">10007</td>
+<td align="right">6334.211</td>
+<td align="right">5421.614</td>
+<td align="right">912.5966</td>
+</tr>
+<tr class="even">
+<td align="left">New York</td>
+<td align="left">NA</td>
+<td align="right">10069</td>
+<td align="right">4623.042</td>
+<td align="right">3874.918</td>
+<td align="right">748.1245</td>
+</tr>
+<tr class="odd">
+<td align="left">New York</td>
+<td align="left">Lower East Side</td>
+<td align="right">10009</td>
+<td align="right">3406.442</td>
+<td align="right">2692.187</td>
+<td align="right">714.2550</td>
+</tr>
+<tr class="even">
+<td align="left">New York</td>
+<td align="left">Gramercy Park and Murray Hill</td>
+<td align="right">10016</td>
+<td align="right">3731.135</td>
+<td align="right">3019.431</td>
+<td align="right">711.7045</td>
+</tr>
+<tr class="odd">
+<td align="left">New York</td>
+<td align="left">Chelsea and Clinton</td>
+<td align="right">10001</td>
+<td align="right">4108.098</td>
+<td align="right">3397.648</td>
+<td align="right">710.4499</td>
+</tr>
+<tr class="even">
+<td align="left">New York</td>
+<td align="left">Lower East Side</td>
+<td align="right">10002</td>
+<td align="right">3645.416</td>
+<td align="right">2935.113</td>
+<td align="right">710.3028</td>
+</tr>
+<tr class="odd">
+<td align="left">New York</td>
+<td align="left">Lower Manhattan</td>
+<td align="right">10004</td>
+<td align="right">3149.658</td>
+<td align="right">2443.697</td>
+<td align="right">705.9608</td>
+</tr>
+<tr class="even">
+<td align="left">New York</td>
+<td align="left">Lower Manhattan</td>
+<td align="right">10038</td>
+<td align="right">3573.201</td>
+<td align="right">2875.616</td>
+<td align="right">697.5853</td>
+</tr>
+<tr class="odd">
+<td align="left">New York</td>
+<td align="left">Greenwich Village and Soho</td>
+<td align="right">10012</td>
+<td align="right">3628.566</td>
+<td align="right">2942.344</td>
+<td align="right">686.2218</td>
+</tr>
+<tr class="even">
+<td align="left">New York</td>
+<td align="left">Gramercy Park and Murray Hill</td>
+<td align="right">10010</td>
+<td align="right">3697.284</td>
+<td align="right">3012.353</td>
+<td align="right">684.9304</td>
+</tr>
+</tbody>
+</table>
+<p>In January 2020 to January 2021, Manhattan neighborhoods saw the
+largest rent declines across NYC, with the steepest drop in Lower
+Manhattan (zip 10007), where average rent fell by about $913. Other
+areas with major decreases included the Lower East Side,
+Chelsea/Clinton, Gramercy/Murray Hill, and Greenwich Village/SoHo, all
+historically high-rent markets. These declines reflect the early
+COVID-19 pandemic, when many residents left the city and so therefore,
+the demand for centrally located, expensive rentals fell by a lot.</p>
 </div>
 
 

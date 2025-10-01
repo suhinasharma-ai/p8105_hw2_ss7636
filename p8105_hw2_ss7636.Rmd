@@ -13,15 +13,18 @@ library(tidyverse)
 library(readxl)
 ```
 
-# Number 1
+# Problem 1
 ```{r}
+#Importing original pols dataset and study it.
 pols = 
  read_csv("fivethirtyeight_datasets/pols-month.csv", na = c("NA",".", ""))
 
 pols
 ```
 ```{r}
-pols = pols |> 
+#Cleaning the data. Separating the mon column into year, month, day. Adding a new column preseident to show the values of prez_gop and prez_dem. Removing the prez_gop and prez_dem column names.
+pols = 
+ read_csv("fivethirtyeight_datasets/pols-month.csv", na = c("NA",".", "")) |> 
   separate(mon, into = c("year", "month", "day"), sep = "-") |> 
   mutate(
     month = month.name[as.integer(month)],
@@ -33,18 +36,22 @@ pols = pols |>
     prez_dem == 1 ~ "dem"
     )) |> 
   select(-prez_gop, -prez_dem, -day)
-  
+
 pols
+
 ```
 
 ```{r}
+#Importing original snap dataset and study it.
 snp = 
  read_csv("fivethirtyeight_datasets/snp.csv", na = c("NA",".", ""))
 
 snp
 ```
 ```{r}
-snp = snp |> 
+#Clean snp dataset. Separate date into month, day, and year. Add 1900 or 2000 to year depending on the case. Remove day variable and change order of columns.
+snp = 
+ read_csv("fivethirtyeight_datasets/snp.csv", na = c("NA",".", "")) |>  
   separate(date, into = c("month", "day", "year"), sep = "/") |> 
   mutate(
     month = month.name[as.integer(month)],
@@ -54,20 +61,23 @@ snp = snp |>
     year > 15 ~ year + 1900, # from 40-99, add 1900 to the year
     year <= 15 ~ year + 2000 # from 00-15, add 2000 to year
   )) |> 
-  relocate(year, month, day, close)
+  relocate(year, month, day, close) |> 
+  select(-"day")
 
 snp
 
 ```
 
 ```{r}
+#Clean unemployment dataset. Pivot longer date format, and mutate to show the full month name.
+
 unemployment = 
  read_csv("fivethirtyeight_datasets/unemployment.csv", na = c("NA",".", "")) |> 
  janitor :: clean_names() |> 
   pivot_longer(
     cols = jan:dec,       # all the month columns
     names_to = "month",   # new column name for the keys
-    values_to = "value"   # new column name for the values
+    values_to = "percent unemployment"   # new column name for the values
   ) |> 
   mutate(month = case_match(
     month,
@@ -102,39 +112,46 @@ joined_df_pols_snap_unemployment = left_join(joined_df_pols_snap, unemployment, 
 joined_df_pols_snap_unemployment 
 ```
 
-The file “pols-month” contains 822 observations of 9 variables related to the number of national politicians who are democratic or republican at any given time. The year started as early as 1947 and goes until 2015. It contained key columns such as, mon: date of the count, prez_gop: indicator of whether the president was republican on the associated date (1 = yes, 0 = no), although there were a couple values where prez_gop = 2. prez_dem: indicator of whether the president was democratic on the associated date (1 = yes, 0 = no). The file “snp” contains 787 observations of 2 variables related to Standard & Poor’s stock market index (S&P). The important variables are date: the date of the observation and close: the closing values of the S&P stock index on the associated date. The starting year is 1950 and the end year is 2015. The file “unemployment” contains 68 observations of 13 variables. It contains the percent of unemployment in a certain month and year. The year starts at 1948 and goes until 2015. The key variables after data tidying is year, month, and value (which shows the percent of unemployed). The joint table has 822 rows and 12 columns. The year starts at 1947 and goes until 2015.  The key variables in this table are year, month, value, and president. 
+The file “pols-month” contains 822 observations of 9 variables related to the number of national politicians who are democratic or republican at any given time. The year started as early as 1947 and goes until 2015. It contained key columns such as, mon: date of the count, prez_gop: indicator of whether the president was republican on the associated date (1 = yes, 0 = no), although there were a couple values where prez_gop = 2. prez_dem: indicator of whether the president was democratic on the associated date (1 = yes, 0 = no). The file “snp” contains 787 observations of 2 variables related to Standard & Poor’s stock market index (S&P). The important variables are date: the date of the observation and close: the closing values of the S&P stock index on the associated date. The starting year is 1950 and the end year is 2015. The file “unemployment” contains 68 observations of 13 variables. It contains the percent of unemployment in a certain month and year. The year starts at 1948 and goes until 2015. The key variables after data tidying is year, month, and value (which shows the percent of unemployed). The joint table has 822 rows and 11 columns. The year starts at 1947 and goes until 2015.  The key variables in this table are year, month, percent of unemployment, and president. 
 
-# Number 2
+# Problem 2
 ```{r}
+#Import excel file for Mr. Trash Wheel, drop NA dumpster rows. Remove x15 and x16 columns. Round sports_balls.
 mrtrashwheel = read_excel(
-  "202409 Trash Wheel Collection Data.xlsx", sheet = "Mr. Trash Wheel", na = c("NA",".", "")
+  "202509 Trash Wheel Collection Data.xlsx", sheet = "Mr. Trash Wheel", na = c("NA",".", "")
   ) |> 
   janitor::clean_names() |> 
-  filter(!is.na(dumpster)) |> 
+  drop_na(dumpster) |> 
   select(-"x15", -"x16") |> 
   mutate(sports_balls = as.integer(round(sports_balls)))
 
 mrtrashwheel
 ```
 ```{r}
+#Import excel file for Professor. Trash Wheel, drop NA dumpster rows.
+
 professortrashwheel = read_excel(
-  "202409 Trash Wheel Collection Data.xlsx", sheet = "Professor Trash Wheel", na = c("NA",".", "")
+  "202509 Trash Wheel Collection Data.xlsx", sheet = "Professor Trash Wheel", na = c("NA",".", "")
   ) |> 
   janitor::clean_names() |> 
-  slice(1:(n() - 3)) # remove 3 last rows from the bottom
+  drop_na(dumpster)
 
 professortrashwheel
 ```
 ```{r}
+#Import excel file for Gwynnda Trash Wheel, drop NA dumpster rows.
+
 gwynndatrashwheel = read_excel(
-  "202409 Trash Wheel Collection Data.xlsx", sheet = "Gwynnda Trash Wheel", na = c("NA",".", "")
+  "202509 Trash Wheel Collection Data.xlsx", sheet = "Gwynns Falls Trash Wheel", na = c("NA",".", "")
   ) |> 
   janitor::clean_names() |> 
-  slice(1:(n() - 1))
+  drop_na(dumpster)
 
 gwynndatrashwheel
 ```
 ```{r}
+#Add another column called "trashwheel" that describes what trash wheel it is. This will be helpful when we bind the datasets.
+
 mrtrashwheel = mrtrashwheel |> 
   mutate(trashwheel = "mrtrashwheel")
 professortrashwheel = professortrashwheel |> 
@@ -173,11 +190,100 @@ For available data, the total weight of trash collected by Professor Trash Wheel
 In addition, the total number of cigarette butts collected by Gwynnda in June 2022 was  
 `r trash_wheels |> filter(trashwheel == "gwynndatrashwheel", month == "June", year == 2022) |> summarise(total = sum(cigarette_butts, na.rm = TRUE)) |> pull(total)`.
 
+# Problem 3:
+
+```{r}
+#Import and clean zipcodes dataset. Remove irrelevant columns, such as state_fips and file_date. 
+zipcodes = 
+ read_csv("zillow_data/Zip Codes.csv", na = c("NA",".", "")) |> 
+  janitor :: clean_names() |> 
+  select(-"state_fips", -"file_date")  
+zipcodes
+
+```
+```{r}
+#Import zillow dataset and analyze what needs to be changed.
+zillow = 
+ read_csv("zillow_data/Zip_zori_uc_sfrcondomfr_sm_month_NYC.csv", na = c("NA",".", "")) |> 
+  janitor:: clean_names() 
+zillow
+```
+```{r}
+#Clean zillow dataset. Pivot longer the dates, showing the rent values on zillow. Removing irrelelvent columns. Changing the name of region_name to zip_code so it can match up with the name in the zipcodes dataset. Removing the "County" text in the county_name column, so the format can match up with the county names in the zipcodes dataset. Also want to rename county_name to county so I can join the dataset by zipcode and county. 
+zillow = 
+ read_csv("zillow_data/Zip_zori_uc_sfrcondomfr_sm_month_NYC.csv", na = c("NA",".", "")) |> 
+  janitor:: clean_names() |> 
+  pivot_longer(
+    cols = x2015_01_31:x2024_08_31,       
+    names_to = "date",  
+    values_to = "zori"   
+  ) |> 
+  mutate(
+    date = str_remove(date, "x")
+  ) |> 
+  select(-"city", -"metro", -"region_type",  -"state_name", -"state") |> 
+  rename(zip_code = region_name) |> 
+  mutate(
+    county_name = str_remove(county_name, " County")
+  ) |> 
+  rename(county = county_name)
+zillow
+```
+
+```{r}
+#Left joining zillow to zipcodes dataset.
+joined_zipcodes_nyc = left_join(zipcodes, zillow, by = c("zip_code", "county"))
+joined_zipcodes_nyc
+```
 
 
+The tidy dataset contains `r nrow(joined_zipcodes_nyc)` total observations, with 
+`r n_distinct(joined_zipcodes_nyc |> pull(zip_code))` unique ZIP codes and 
+`r n_distinct(joined_zipcodes_nyc |> pull(neighborhood))` unique neighborhoods.
 
 
 ```{r}
-#3. remove usless columns statefibs, filedate, there are 2 repeated zipcodes, bronx and new york, kings and new york, drop county, got rid of state names, city, metro, get rid of region type. rename region name to zip code, you should pivot longer
+zip_not_in_zillow = zipcodes |> 
+  anti_join(zillow, by = "zip_code")
+
+zip_not_in_zillow
 ```
+
+
+It is possible that these zipcodes are not residential, and are instead an area of reserve or significant landmarks that would not have a rental listing. One example of this would be 10041, as this zip code is a portion of the financial district, which has financial sites and contains significant landmarks like the New York Stock Exchange and One World Trade Center, which would not have a rental listings. Another example would be the zipcode 10101. This area includes businesses and amenities like restaurants, grocery stores, and cafes. Because this is not a residential area, there would not be rental listings. 
+
+
+```{r}
+#Creating a table of top 10 rent difference values. Separating date into year, month, day and doing filtering year 2020 or 2021 and month in January. Doing Pivot wider to have the years be their own columns with the rent as the values. Then I compute the difference between 2020 and 2021 rent values, sort by descending order, and only showing the first 10. 
+
+joined_zipcodes_nyc_top_10_rents = joined_zipcodes_nyc |> 
+  separate(date, into = c("year", "month", "day"), sep = "_") |> 
+  mutate(
+    year = as.integer(year),
+    month = as.integer(month),
+    day = as.integer(day)
+  ) |> 
+  filter((year == 2020 | year == 2021) & month == 1) |> 
+  drop_na(zori) |> 
+  pivot_wider(
+    names_from = year, 
+    values_from = zori) |> 
+  select(-"month", -"day") |> 
+  mutate(
+    difference = `2020`-`2021`
+  ) |> 
+  arrange(desc(difference)) |>
+  head(10) |> 
+  select(county, neighborhood, zip_code, `2020`, `2021`, difference)
+
+joined_zipcodes_nyc_top_10_rents
+  
+```
+Create a table
+```{r}
+knitr::kable(joined_zipcodes_nyc_top_10_rents)
+```
+
+In January 2020 to January 2021, Manhattan neighborhoods saw the largest rent declines across NYC, with the steepest drop in Lower Manhattan (zip 10007), where average rent fell by about $913. Other areas with major decreases included the Lower East Side, Chelsea/Clinton, Gramercy/Murray Hill, and Greenwich Village/SoHo, all historically high-rent markets. These declines reflect the early COVID-19 pandemic, when many residents left the city and so therefore, the demand for centrally located, expensive rentals fell by a lot.
+
 
